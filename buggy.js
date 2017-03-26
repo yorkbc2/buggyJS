@@ -161,6 +161,16 @@ buggyDOM.fns = buggyDOM.prototype = {
  		else {
  			return this;
  		}
+ 	},
+
+ 	css(prop, val) {
+
+ 		let realObj = this.is()
+
+ 		realObj.style[prop.toString()] = val;
+
+ 		return this;
+
  	}
 
 }
@@ -225,5 +235,104 @@ Buggy.forBuggy([
 		}
 
 		return this
+	},
+	// function toggleClass (className, timeout) {
+	// 	let el = this.is()
+	// 	function toggling (arg_timeout, global_element) {
+	// 			let started = el.className,
+	// 				replaced = started.replace(" ", ","),
+	// 				arrayElement   = replaced.split(','),
+	// 				arrayArgument  = className.replace(" ", ",").split(',');
+
+	// 			console.log(started, replaced ,arrayElement,arrayArgument)
+
+	// 			for(let i = 0 ; i < arrayElement.length ; i++) {
+	// 				for(let j = 0 ; j < arrayArgument.length ; j++) {
+	// 					console.log(arrayArgument[j])
+	// 					console.log(arrayElement[i])
+	// 					if(arrayElement[i] == arrayArgument[j]) {
+	// 						console.log("EQUALING")
+	// 						started = started.replace(arrayElement[i], '')
+	// 					}
+	// 					else {
+	// 						started = started + " " + arrayArgument[j]
+	// 					}
+	// 				}
+	// 			}
+
+	// 			return started;
+
+	// 	}	
+
+	// 	el.className = toggling(timeout, this)
+
+	// 	return this;
+	// }
+
+	function hasClass(className) {
+		let element = this.is();
+
+			let startedClassName = element.className;
+			console.log(startedClassName)
+			let repliced         = startedClassName.replace(' ', ',');
+			let splited 		 = repliced.split(',');
+
+
+		let counter = false
+
+		for(let i = 0 ; i  <splited.length ; i++) {
+			if(splited[i] == className) {
+				counter = true
+				this.hasClass = counter
+				return this.hasClass
+			}
+		}
+
+		this.hasClass = false
+
+		return this.hasClass;
+	}
+])
+
+
+
+Buggy.forBuggy([
+	function hide (timeout) {
+
+		let el = this.is()
+
+		function hiding(timeout) {
+			if(timeout == 'slow') {timeout = 1000/100;}
+			else if(timeout == 'fast') {timeout = 1000/200}
+			else {timeout = 1000/150}
+
+			let op = el.style.opacity = 1
+			let int = setInterval(function () {
+				el.css('opacity', op)
+				op = op - 0.01
+
+				if(op <= 0) {
+					clearInterval(int)
+				}
+			}, timeout)
+		}
+
+		hiding(timeout)
+
+
+		return this
+
+	}
+
+])
+
+
+Buggy.forBuggy([
+	function click (callBack) {
+		let thisElement = this.is()
+		console.log(callBack)
+		thisElement.addEventListener('click', callBack)
+
+		return this;
 	}
 ])
