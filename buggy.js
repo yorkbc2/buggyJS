@@ -34,8 +34,24 @@ buggyDOM.fns = buggyDOM.prototype = {
 		let element = this.get(buggyString),
 			// Returned object
 			buggyObject = {}
+
 		// Element = element (DOM element in object)
-		buggyObject.element = element;
+
+		if(element[0] == undefined) {
+
+			let buggyProto 		= Object.assign(element.__proto__, this)
+			element.__proto__   = buggyProto
+			buggyObject.element         = element
+		}
+		else {
+			for(let i = 0 ; i < element.length; i++) {
+				let key = i.toString()
+
+				let buggyProto = Object.assign(element[i].__proto__, this)
+				element[i].__proto__ =  buggyProto
+				buggyObject[key] = element[i]
+			}
+		}
 
 		// _PPROTO_ prototyping buggy methods
 		buggyObject.__proto__ = this;
@@ -67,7 +83,7 @@ buggyDOM.fns = buggyDOM.prototype = {
 
 	// Private function for get One ELEMENT FROM DOM 
 
-	getOne(buggyString, element) {,
+	getOne(buggyString, element) {
 		// it's just symbol, element and empty array at the start
 		let symbol = buggyString.slice(0,1),
 			domElement = buggyString.slice(1),
@@ -97,7 +113,6 @@ buggyDOM.fns = buggyDOM.prototype = {
 			for(let i = 0; i < element.childNodes.length ; i++) {
 				for(let j = 0 ; j < arrayForMany.length ; j++) {
 					if(element.childNodes[i] == arrayForMany[j]) {
-						console.log(element.childNodes[i])
 						return element.childNodes[i];
 					}
 				}
@@ -126,6 +141,89 @@ buggyDOM.fns = buggyDOM.prototype = {
 
 
  		return element;
+ 	},
+
+ 	html(message) {
+ 		if(this.element) {
+ 			this.element.innerHTML = message;
+ 		}
+ 		else {
+ 			this.innerHTML = message
+ 		}
+
+ 		return this;
+ 	},
+
+ 	is() {
+ 		if(this.element) {
+ 			return this.element
+ 		}
+ 		else {
+ 			return this;
+ 		}
  	}
 
 }
+
+let Buggy = {
+	forBuggy(args) {
+		let to = buggyDOM.fns
+
+		for(let i = 0 ; i < args.length ; i++) {
+			let name = args[i].name
+
+			to[name.toString()] = args[i]
+		}
+	}
+}
+
+Buggy.forBuggy([
+	function addClass(className, timeout) {
+		let now = this.is()
+
+		function adding() {
+			let started = now.className,
+				spaced = started + " ",
+				final  = spaced + className;
+
+			now.className = final
+
+		}
+		if(timeout) {
+			setTimeout(() => {
+				adding()
+			}, timeout)
+		}
+		else {
+			adding()
+		}
+		return this;
+	},
+
+	function removeClass(args, timeout) {
+		let now = this.is()
+
+		function removing() {
+			let started = now.className;
+			let spaced  = args.replace(' ', ',');
+			let splited = spaced.split(','),
+				final = '';
+			for(let i = 0 ; i < splited.length ; i++) {
+				started = started.replace(splited[i], '');
+			}
+
+			now.className = started.trim()
+		}
+
+		if(timeout) {
+			setTimeout(() => {
+				removing()
+			}, timeout)
+		}
+		else {
+			removing()
+		}
+
+		return this
+	}
+])

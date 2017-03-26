@@ -1,0 +1,7 @@
+*.html
+*.md
+*.log
+*.debug
+*.php
+*.ts
+*.coffee
