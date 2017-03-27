@@ -7,13 +7,33 @@
 
 // DOM Element
 
-let buggyDOM, buggy;
+let buggyDOM, buggy, error, type, types;
+
+error = function (message) {
+	throw new Error(message);
+}
+
+type = function (obj) {
+	return typeof obj;
+}
+
+types = function (arr) {
+	let el;
+	forEach(el => {
+		arr.push(typeof el)
+	})
+
+	return el;
+}
 
 let regs = {
 	forReplace(started, find, replace) {
 		return started.replace(new RegExp(find, 'g'), replace)
 	}
 }
+
+const body = document.body,
+	  head = document.head;
 
 // Main function of create element in local DOM
 buggyDOM  = function (buggyString) {
@@ -27,6 +47,8 @@ buggyDOM.fns = buggyDOM.prototype = {
 	version: "0.0.1",
 	// Author of a lib (very bad man)
 	author: "Alex Yorke",
+
+	allAttributes: [],
 
 	// first object Creator
 	creator(buggyString) {
@@ -142,8 +164,8 @@ buggyDOM.fns = buggyDOM.prototype = {
 
  		return element;
  	},
-
- 	html(message) {
+ 	// Buggy Prototyping inner text
+ 	text(message) {
  		if(this.element) {
  			this.element.innerHTML = message;
  		}
@@ -153,7 +175,7 @@ buggyDOM.fns = buggyDOM.prototype = {
 
  		return this;
  	},
-
+ 	// Buggy function for BuggyELement detected
  	is() {
  		if(this.element) {
  			return this.element
@@ -162,21 +184,33 @@ buggyDOM.fns = buggyDOM.prototype = {
  			return this;
  		}
  	},
-
+ 	// Simple css Method for styling element
  	css(prop, val) {
 
- 		let realObj = this.is()
+ 		if(val) {
+ 			let realObj = this.is()
 
- 		realObj.style[prop.toString()] = val;
+	 		realObj.style[prop.toString()] = val;
 
- 		return this;
+	 		return this;
+ 		}
+ 		else {
+ 			let realObj = this.is()
+
+ 			let val = realObj.style[prop.toString()];
+
+ 			return val;
+ 		}
 
  	}
 
 }
 
+// Main object BUGGY
 let Buggy = {
-	forBuggy(args) {
+	// First method is extends()
+	// We can create plugins with this method;
+	extends(args) {
 		let to = buggyDOM.fns
 
 		for(let i = 0 ; i < args.length ; i++) {
@@ -184,19 +218,157 @@ let Buggy = {
 
 			to[name.toString()] = args[i]
 		}
+	},
+	// Something like extends, but with one function
+	extend(fun) {
+		let to = buggyDOM.fns;
+
+		let name = fun.name;
+
+		if(name == 'undefined' || name == null || name == undefined || name == '') {
+			throw new Error("Name of function is REQUIRED!")
+		}
+		else {
+			to[name.toString()] = fun 
+		}
+
+	},
+	// Method for detected object. 
+	// If object isn't detected == throw error!
+	has(obj, error) {
+		if(!obj){
+			throw new Error(error)
+		}
+		else {
+			return true;
+		}
+	},
+	// We can create new element DOM and __proto__ buggy.fns
+	new(el) {
+		if(el) {
+
+			let newEl = document.createElement(el);
+			newEl.__proto__ = Object.assign(newEl.__proto__, buggyDOM.fns)
+
+			return newEl;
+		}
+		else {
+			throw new Error("Element is undefined")
+		}
+	},
+	// == window.onload
+	onload(callBack) {
+		window.onload = callBack;
+		return window;
+	},
+	// == window.onresize
+	onresize(callBack) {
+		window.onresize = callBack;
+		return window;
+	},
+	//  Give all elements with this tag
+	all(tag) {
+		return document.querySelectorAll(tag)
+	},
+	// Prototyping by buggyProto
+	buggyProto(element) {
+		let proto, buggyProto, result;
+
+		proto = element.__proto__
+
+		buggyProto = buggyDOM.fns;
+
+		result = element.__proto__ = Object.assign(proto, buggyProto)
+
+		return result;
+	},
+	// Find Attribute in DOM and do event, when this attribute found. Give all elements with this Attribute in argument event()
+	findAttr(object) {
+		let name, tagName, callBack, all;
+
+		all = this.all;
+
+		name = object.name;
+		tagName = object.tag || object.tags;
+		callBack = object.event;
+
+		if(!name) {
+			error("Name of Attribute is undefined")
+		}
+		else if (!tagName) {
+			error("TagName of Attribute is undefined")
+		}
+		else if (!callBack) {
+			error("CallBack of Attribute is undefined")
+		}
+		else {
+			if(type(tagName) == 'string') {	
+				let elements = all(tagName)
+				let allBlocks = []
+				elements.forEach(el => {
+					if(el.getAttribute(name) !== null) {
+						Buggy.buggyProto(el)
+						allBlocks.push(el)
+					}
+				})
+				return callBack(allBlocks)
+			}
+			else if(type(tagName) == 'object') {
+				let tagElements = [],
+					allBlocks   = [];
+
+				for(let i = 0 ; i < tagName ; i++) {
+					tagElements.push(tagName[i])
+				}
+
+				tagElements.forEach(el => {
+					let elems = all(el)
+					elems.forEach(another => {
+						if(another.getAttribute(name)) {
+							Buggy.buggyProto(el)
+							allBlocks.push(another)
+						}
+					})
+
+				})
+
+				return callBack(allBlocks)
+
+			}
+			else {
+				error("TypeOf tag is undefined")
+			}
+		}
 	}
+
 }
 
-Buggy.forBuggy([
+Buggy.extends([
+	// Simple AddClass Funciton 
 	function addClass(className, timeout) {
 		let now = this.is()
 
 		function adding() {
 			let started = now.className,
 				spaced = started + " ",
-				final  = spaced + className;
+				final  = spaced + className,
+				replaced = started.replace(' ', ','),
+				splited = replaced.split(','),
+				hasClass = false
 
-			now.className = final
+			for(let i = 0 ; i < splited.length ; i++) {
+				if(className == splited[i]) {
+					hasClass = true;
+				}
+			}
+
+			if(hasClass) {
+				now.className = started
+			}
+			else {
+				now.className = final
+			}
+
 
 		}
 		if(timeout) {
@@ -209,7 +381,7 @@ Buggy.forBuggy([
 		}
 		return this;
 	},
-
+	// Simple RemoveClass Function
 	function removeClass(args, timeout) {
 		let now = this.is()
 
@@ -236,6 +408,7 @@ Buggy.forBuggy([
 
 		return this
 	},
+	// DOIT
 	// function toggleClass (className, timeout) {
 	// 	let el = this.is()
 	// 	function toggling (arg_timeout, global_element) {
@@ -268,7 +441,7 @@ Buggy.forBuggy([
 
 	// 	return this;
 	// }
-
+	// If has class return true (doesn't work)
 	function hasClass(className) {
 		let element = this.is();
 
@@ -296,7 +469,8 @@ Buggy.forBuggy([
 
 
 
-Buggy.forBuggy([
+Buggy.extends([
+	// Simple animation (Hide)
 	function hide (timeout) {
 
 		let el = this.is()
@@ -327,12 +501,258 @@ Buggy.forBuggy([
 ])
 
 
-Buggy.forBuggy([
+Buggy.extends([
+	// Like addEventListern('click') but short
 	function click (callBack) {
 		let thisElement = this.is()
 		console.log(callBack)
 		thisElement.addEventListener('click', callBack)
 
 		return this;
+	},
+	// like mouseOver but chort
+	function hover (callBack) {
+		let thisElement = this.is()
+
+		console.log(callBack)
+		thisElement.addEventListener('mouseover', callBack)
+
+		return this;
+	},
+	// Mouseover but easy
+	function mouseover(callBack) {
+		let thisElement = this.is()
+
+		console.log(callBack)
+		thisElement.addEventListener('mouseover', callBack)
+
+		return this;
+	},
+	// MouseOut but easy
+	function mouseout(callBack) {
+		let thisElement = this.is()
+
+		console.log(callBack)
+		thisElement.addEventListener('mouseout', callBack)
+
+		return this;
+	},
+	// Very cool method. It wait some seconds and do callBack when this Seconds is out
+	function tickOver(callBack, seconds) {
+		let thisElement = this.is()
+		console.log(callBack)
+		let i = 0 ;
+		thisElement.mouseover(() => {
+			let interval = setInterval(() => {
+				i++;
+				console.log(i)
+				if(i >= seconds) {
+					callBack()
+					clearInterval(interval)
+				}
+			}, 1000)
+
+			thisElement.mouseout(() => {
+				i = 0;
+				clearInterval(interval)
+			})
+		})
+
+
+		return this;
+	},
+	// Create event from the eventList
+	function event(eventName, callBack) {
+		let eventList = ['input', 'click', 'mouseover', 'mouseout', 'focus', 'dblclick', 'change', 'keydown'],
+			element   = this.is();
+
+		eventList.forEach(el => {
+			if(el == eventName) {
+				element.addEventListener(eventName, callBack)
+			}
+		})
+
+		return this;
 	}
 ])
+
+
+// New object BuggyBOM (For BOM manipulation)
+let buggyBOM = {
+	__proto__: Buggy,
+
+	width() {
+		return window.innerWidth
+	},
+	height() {
+		return window.innerHeight
+	},
+	resolution() {
+		return {
+			width: this.width,
+			height: this.height
+		}
+	},
+	scrollTop(value) {
+		
+		return value;
+	}
+}
+
+
+// Short object Helper
+let Helper = {
+	__proto__: Buggy,
+	float(value) {
+		return parseFloat(value)
+	},
+	integer(value) {
+		return parseInt(value)
+	}
+}
+
+
+Buggy.extends([
+	// Simple Animation (show)
+	function show (timeout) {
+		let times = timeout.toString()
+
+		let thisis = this.is()
+
+		function showing(timeout) {
+			if(times == 'slow') {
+				timeout = 1500/100
+			}
+			else if(times == 'fast') {
+				timeout = 1000/100
+			}
+			else {
+				timeout = 1250/100
+			}
+
+			let op = thisis.css('opacity') = 0
+			let int = setInterval(function () {
+				thisis.css('opacity', op)
+				op = op + 0.01
+
+				if(op <= 0) {
+					clearInterval(int)
+				}
+			}, timeout)
+		}
+
+		showing(timeout)
+
+		return this;
+	},
+	function toggle (timeout) {
+
+		
+	},
+	// Simple append
+	function append(child) {
+		let el = this.is()
+
+		el.appendChild(child)
+		return el;
+	}
+
+])
+
+Buggy.extends([
+	// Set some attribute
+	function setAttr (name, val) {
+		let element, oldattribute, newattribute;
+
+		element = this.is()
+
+		oldattribute = element.getAttribute(name);
+
+		if(oldattribute) {
+			element.allAttributes.push(oldattribute)
+			element.setAttribute(name, val)
+		}
+		else {
+			element.setAttribute(name, val)
+		}
+
+		return this;
+	},
+	// Get some attribute
+	function getAttr (name) {
+		let element, attr ;
+
+		element = this.is()
+
+		attr = element.getAttribute(name)
+
+		return attr;
+	}
+])
+// First slider by BuggyDOM
+Buggy.extend(function slider(object) {
+	let theme, images, dots, interval, autoSlide, arrowColor, parts, thisis, counter;
+
+	dots = object.dots || true;
+	interval = object.interval || 3000;
+	arrowColor = object.arrow || '#fff';
+	theme = object.theme || 'parts';
+	parts = object.parts || 5;
+	autoSlide = object.auto || true;
+	thisis = this.is();
+	counter = object.current || 0;
+
+	Buggy.has(object.images, "Images is undefined!")
+	images = object.images;
+
+	function slide(images) {
+		thisis.addClass('buggy-slider-parts')
+		counter++;
+		let part, sliders, partList, sliderList;
+		let width = thisis.clientWidth;
+		partList = [];
+		sliderList = [];
+		let partPositionLength = []
+
+		width = parseInt(width);
+		console.log(width)
+		let partWidth = width / parts,
+		partPosition  = 0;
+
+		for(let i = 0; i < images.length ; i++) {
+			sliders = Buggy.new('div')
+			console.log(sliders)
+			for(let j = 0; j < parts; j++) {
+				part = Buggy.new('div')
+				part.css('backroundImage', `url(${images[i]})`)
+				part.css('width', `${partWidth}px`)
+				part.css('backgroundPosition', `${partPosition}px 0`)
+				part.addClass('slidePart')
+
+				partPosition = partPosition - partWidth;
+				partPositionLength.push(partPosition)
+				if(partPositionLength.length >= parts) {
+					partPosition = 0;
+					partPositionLength = []
+				}
+
+				if(partPosition )
+				console.log(partPosition)
+
+				sliders.append(part)
+				partList.push(part)
+			}
+			sliderList.push(sliders)
+		}
+
+
+
+
+	}
+
+	Buggy.onload(() => {
+		slide(images)
+	})
+
+	return this;
+})

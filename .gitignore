@@ -5,3 +5,4 @@
 *.php
 *.ts
 *.coffee
+node_modules
