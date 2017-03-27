@@ -6,3 +6,5 @@
 *.ts
 *.coffee
 node_modules
+
+gulpfile.js

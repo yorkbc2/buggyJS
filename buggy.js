@@ -7,7 +7,10 @@
 
 // DOM Element
 
-let buggyDOM, buggy, error, type, types;
+let buggyDOM, buggy, error, type, types, ivl, head, body;
+
+head = document.head;
+body = document.body
 
 error = function (message) {
 	throw new Error(message);
@@ -26,14 +29,16 @@ types = function (arr) {
 	return el;
 }
 
+ivl = function (callBack, seconds) {
+	return setInterval(callBack, seconds)
+}
+
 let regs = {
 	forReplace(started, find, replace) {
 		return started.replace(new RegExp(find, 'g'), replace)
 	}
 }
 
-const body = document.body,
-	  head = document.head;
 
 // Main function of create element in local DOM
 buggyDOM  = function (buggyString) {
@@ -49,6 +54,8 @@ buggyDOM.fns = buggyDOM.prototype = {
 	author: "Alex Yorke",
 
 	allAttributes: [],
+
+	removedElements: [],
 
 	// first object Creator
 	creator(buggyString) {
@@ -202,6 +209,10 @@ buggyDOM.fns = buggyDOM.prototype = {
  			return val;
  		}
 
+ 	},
+
+ 	parent() {
+ 		return this.is().parentNode;
  	}
 
 }
@@ -756,3 +767,59 @@ Buggy.extend(function slider(object) {
 
 	return this;
 })
+
+Buggy.extend(function blur(animationDuration, fillMode) {
+	let element, blureDur, allFillModes;
+
+	allFillModes = ['infinite', 'forwards', 'backwards']
+
+	blureDur = animationDuration || 1;
+
+	element = this.is()
+
+	if(fillMode) {
+		element.css('animation', `bluring ${blureDur}s linear ${fillMode}`)
+	}
+	else {
+		element.css('animation', `bluring ${blureDur}s linear infinite`)
+	}
+	return this;
+
+})
+
+Buggy.extends([
+	function remove () {
+		let element, parent;
+
+		element = this.is()
+		parent = element.parent()
+
+		this.removedElements.push(element);
+
+		parent.removeChild(element);
+
+		return this;
+	},
+	function destroy () {
+		let element, parent;
+
+		element = this.is()
+		parent  = element.parent()
+
+		parent.removeChild(element)
+
+		return this;
+	},
+	function unremove (callBack) {
+		let removed = this.removedElements;
+
+		callBack(removed);
+
+		return this;
+	}
+
+])
+
+
+
+Buggy.dom = buggyDOM;
