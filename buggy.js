@@ -7,7 +7,7 @@
 
 // DOM Element
 
-let buggyDOM, buggy, error, type, types, ivl, head, body;
+let buggyDOM, buggy, error, type, types, ivl, head, body, upperCase, lowerCase;
 
 head = document.head;
 body = document.body
@@ -39,6 +39,14 @@ let regs = {
 	}
 }
 
+upperCase = function (text) {
+	return text.toUpperCase()
+}
+
+lowerCase = function (text) {
+	return text.toLowerCase()
+}
+
 
 // Main function of create element in local DOM
 buggyDOM  = function (buggyString) {
@@ -56,6 +64,8 @@ buggyDOM.fns = buggyDOM.prototype = {
 	allAttributes: [],
 
 	removedElements: [],
+
+	length: 0,
 
 	// first object Creator
 	creator(buggyString) {
@@ -75,7 +85,7 @@ buggyDOM.fns = buggyDOM.prototype = {
 		else {
 			for(let i = 0 ; i < element.length; i++) {
 				let key = i.toString()
-
+				this.length = i + 1;
 				let buggyProto = Object.assign(element[i].__proto__, this)
 				element[i].__proto__ =  buggyProto
 				buggyObject[key] = element[i]
@@ -173,14 +183,24 @@ buggyDOM.fns = buggyDOM.prototype = {
  	},
  	// Buggy Prototyping inner text
  	text(message) {
- 		if(this.element) {
- 			this.element.innerHTML = message;
+ 		if(message) {
+	 		if(this.element) {
+	 			this.element.innerHTML = message;
+	 		}
+	 		else {
+	 			this.innerHTML = message
+	 		}
+ 			return this;
  		}
  		else {
- 			this.innerHTML = message
+ 			if(this.element) {
+ 				return this.element.innerHTML
+ 			}
+ 			else {
+ 				return this.innerHTML;
+ 			}
  		}
 
- 		return this;
  	},
  	// Buggy function for BuggyELement detected
  	is() {
@@ -294,7 +314,7 @@ let Buggy = {
 		return result;
 	},
 	// Find Attribute in DOM and do event, when this attribute found. Give all elements with this Attribute in argument event()
-	findAttr(object) {
+	attr(object) {
 		let name, tagName, callBack, all;
 
 		all = this.all;
@@ -328,15 +348,19 @@ let Buggy = {
 				let tagElements = [],
 					allBlocks   = [];
 
-				for(let i = 0 ; i < tagName ; i++) {
+				for(let i = 0 ; i < tagName.length ; i++) {
 					tagElements.push(tagName[i])
 				}
+				console.log(tagElements)
 
 				tagElements.forEach(el => {
 					let elems = all(el)
+					console.log(elems)
 					elems.forEach(another => {
+						console.log(another.getAttribute(name))
 						if(another.getAttribute(name)) {
-							Buggy.buggyProto(el)
+							Buggy.buggyProto(another)
+							console.log(another)
 							allBlocks.push(another)
 						}
 					})
@@ -349,6 +373,21 @@ let Buggy = {
 			else {
 				error("TypeOf tag is undefined")
 			}
+		}
+	},
+
+	is(element) {
+		if(
+			element !== null ||
+			element !== undefined ||
+			element !== '' ||
+			type(element) !== 'undefined' ||
+			type(element) !== 'null'
+		) {
+			return true;
+		}
+		else {
+			return false
 		}
 	}
 
@@ -820,6 +859,63 @@ Buggy.extends([
 
 ])
 
+Buggy.extend(function each (callBack) {
+	let th = this.is(),
+		sendArray = []
+	for (let i = 0; i < th.length; i++) {
+		sendArray.push(th[i.toString()])
+	}
+	if(Buggy.is(th[0])) {
+		sendArray.forEach(el => {
+			callBack(el)
+		})
+	}
+	else {
+		throw new Error("Element isn't array")
+	}
+
+	return this;
+})
+
+// Text transfromation methods
+
+Buggy.extends([
+	function upper(callBack) {
+		let oldText, newText;
+
+		oldText = this.is().text()
+
+		newText = upperCase(oldText);
+
+		this.is().text(newText)
+
+		if(callBack) {
+			callBack(oldText)
+		}
+		return this;
+	},
+	function lower(callBack) {
+		let oldText, newText;
+
+		oldText = this.is().text()
+
+		newText = lowerCase(oldText)
+
+		this.is().text(newText)
+
+		if(callBack) {
+			callBack(oldText)
+		}
+
+		return this;
+	},
+	function under() {
+		this.is().css('text-decoration', 'underline')
+
+		return this;
+	}
+
+])
 
 
 Buggy.dom = buggyDOM;
